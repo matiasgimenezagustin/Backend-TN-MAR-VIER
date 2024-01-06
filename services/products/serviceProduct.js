@@ -1,4 +1,4 @@
-const dbQueryAsync = require('../../config/dbConfig')
+const {pool} = require('../../config/dbConfig')
 const mailerService = require('../mailerService/mailerService')
 const { productCreatedTemplate } = require('../mailerService/templates/productMailTemplates')
 
@@ -6,7 +6,7 @@ const { productCreatedTemplate } = require('../mailerService/templates/productMa
 const createProduct = async ({nombre, precio, stock, descripcion}) =>{
     try{
         const query = 'INSERT INTO productos (nombre, precio, stock, descripcion) VALUES (?,?,?,?)'
-        const result = await dbQueryAsync(query, [nombre, precio, stock, descripcion])
+        const result = await pool.promise().query(query, [nombre, precio, stock, descripcion])
         mailerService.transport.sendMail(
             productCreatedTemplate('', 'admin', {nombre, precio, stock, descripcion}), (error)=>{
             if(error){
@@ -27,8 +27,8 @@ const createProduct = async ({nombre, precio, stock, descripcion}) =>{
 const getAllProducts = async (limit) => {
     try{
         const query = 'SELECT * FROM productos'
-        const result = await dbQueryAsync(query)
-
+        const result = (await pool.promise().query(query))[0]
+        console.log(result)
         if(limit){
             return result.splice(limit )
         }
@@ -46,7 +46,8 @@ const getAllProducts = async (limit) => {
 const getProductById = async (pid) => {
     try{
         const query = `SELECT * FROM productos WHERE Id = (?)`
-        const result = await dbQueryAsync(query,[pid])
+        const result = (await pool.promise().query(query,[pid]))[0]
+        console.log(result)
         return result[0]
     }
     catch(error){
@@ -59,7 +60,7 @@ const getProductById = async (pid) => {
 const deleteProductById = async (pid) => {
     try{
         const query = `DELETE FROM productos WHERE Id = (?)`
-        const result = await dbQueryAsync(query,[pid])
+        const result = await pool.promise().query(query,[pid])
         if(result.affectedRows == 0){
             return 404
         }
