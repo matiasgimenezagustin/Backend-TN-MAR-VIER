@@ -53,6 +53,10 @@ app.post('/auth/verify', authMiddleware, (req, res) =>{
 })
 
 
+app.get('/', (req, res) =>{
+    res.send('Text')
+})
+
 app.listen(PORT, () =>{
     console.log('El servidor se esta escuhando en http://localhost:' + PORT + '/')
 })
